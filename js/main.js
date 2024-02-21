@@ -13,56 +13,41 @@ window.onload = function () {
 
     document.body.appendChild(app.view);
 
-    // Player object
-    player = new PIXI.Sprite.from("images/player.png");
-    player.anchor.set(0.5);
+    app.loader.baseUrl = "images";
+    app.loader
+        .add("sprite01", "bloat01.png")
+        .add("sprite02", "bloat02.png")
+        .add("sprite03", "bloat03.png")
+        .add("sprite04", "bloat04.png")
+        .add("sprite05", "bloat05.png")
+        .add("sprite06", "bloat06.png")
+        .add("sprite07", "bloat07.png")
+        .add("sprite08", "bloat08.png")
+        .add("sprite09", "bloat09.png")
+        .add("sprite10", "bloat10.png")
+        .add("player", "player.png");
+
+    app.loader.onProgress.add(showProgress);
+    app.loader.onComplete.add(doneLoading);
+    app.loader.onError.add(reportError);
+
+    app.loader.load();}
+
+function showProgress(e) {
+    console.log(e.progress);
+}
+
+function reportError(e) {
+    console.error("Error: " + e.message);
+}
+
+function doneLoading(e) {
+    console.log("Done loading!");
+
+    player = PIXI.Sprite.from(app.loader.resources.player.texture);
     player.x = app.view.width / 2;
     player.y = app.view.height / 2;
 
+    player.anchor.set(0.5);
     app.stage.addChild(player);
-    // app.addChild(player);
-
-    // Mouse interaction
-    app.stage.interactive = true;
-    app.stage.on("pointermove", movePlayer);
-
-    window.addEventListener("keydown", keysDown);
-    window.addEventListener("keyup", keysUp);
-
-    app.ticker.add(gameLoop);
-
-    keysDiv = document.querySelector("#keys");
-}
-
-function movePlayer(e) {
-    let pos  = e.data.global;
-
-    player.x = pos.x;
-    player.y = pos.y;
-}
-
-function keysDown(e) {
-    console.log(e.keyCode);
-    keys[e.keyCode] = true;
-}
-function keysUp(e) {
-    console.log(e.keyCode);
-    keys[e.keyCode] = false;
-}
-
-function gameLoop() {
-    keysDiv.innerHTML = JSON.stringify(keys, null, 2);
-
-    if (keys[87]) {
-        player.y -= 4;
-    }
-    if (keys[83]) {
-        player.y += 4;
-    }
-    if (keys[65]) {
-        player.x -= 4;
-    }
-    if (keys[68]) {
-        player.x += 4;
-    }
 }
