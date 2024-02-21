@@ -1,7 +1,7 @@
 let app;
 let player;
-let keys = {};
-let keysDiv;
+let bullets = [];
+let bulletSpeed = 10;
 
 window.onload = function () {
     app = new PIXI.Application({
@@ -11,43 +11,57 @@ window.onload = function () {
         hello: true,
     });
 
-    document.body.appendChild(app.view);
+    document.querySelector("#gameDiv")?.appendChild(app.view);
+    document.querySelector("#gameDiv")?.addEventListener("pointerdown", fireBullet);
 
-    app.loader.baseUrl = "images";
-    app.loader
-        .add("sprite01", "bloat01.png")
-        .add("sprite02", "bloat02.png")
-        .add("sprite03", "bloat03.png")
-        .add("sprite04", "bloat04.png")
-        .add("sprite05", "bloat05.png")
-        .add("sprite06", "bloat06.png")
-        .add("sprite07", "bloat07.png")
-        .add("sprite08", "bloat08.png")
-        .add("sprite09", "bloat09.png")
-        .add("sprite10", "bloat10.png")
-        .add("player", "player.png");
-
-    app.loader.onProgress.add(showProgress);
-    app.loader.onComplete.add(doneLoading);
-    app.loader.onError.add(reportError);
-
-    app.loader.load();}
-
-function showProgress(e) {
-    console.log(e.progress);
-}
-
-function reportError(e) {
-    console.error("Error: " + e.message);
-}
-
-function doneLoading(e) {
-    console.log("Done loading!");
-
-    player = PIXI.Sprite.from(app.loader.resources.player.texture);
+    // Player object
+    player = new PIXI.Sprite.from("images/player.png");
+    player.anchor.set(0.5);
     player.x = app.view.width / 2;
     player.y = app.view.height / 2;
 
-    player.anchor.set(0.5);
     app.stage.addChild(player);
+
+    app.ticker.add(gameLoop);
 }
+
+function fireBullet(e) {
+    console.log("Fire!")
+
+    let bullet = createBullet();
+    bullets.push(bullet);
+}
+
+function createBullet() {
+    let bullet = PIXI.Sprite.from("images/bullet.png");
+    bullet.anchor.set(0.5);
+    bullet.x = player.x;
+    bullet.y = player.y;
+    bullet.speed = bulletSpeed;
+    app.stage.addChild(bullet);
+
+    return bullet;
+}
+
+function updateBullets(delta) {
+    for (let i = 0; i < bullets.length; i++) {
+        bullets[i].position.y -= bullets[i].speed;
+
+        if (bullets[i].position.y < 0) {
+            bullets[i].dead = true;
+        }
+    }
+
+    for (let i = 0; i < bullets.length; i++) {
+        if (bullets[i].dead) {
+            app.stage.removeChild(bullets[i]);
+            bullets.splice(i, 1);
+        }
+    }
+}
+
+function gameLoop(delta) {
+    updateBullets(delta);
+}
+
+
